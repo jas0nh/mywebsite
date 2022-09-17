@@ -1,11 +1,11 @@
 # banner
 banner:
-  title : "Hi! I’m <br> Jason <br> Huang"
+  title : "Hi! I’m <br> Zhicheng (Jason) Huang <br> @LBS MAM23’"
 
 # about
 about:
   enable : true
-  content : "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur."
+  content : "Hello world! I'm Zhicheng (Jason) Huang from China. I'm currently persuing my master degree at London Business School. <br> 你好世界！我是黄至成，很高兴认识你。"
   button:
     enable : true
     label : "know more"
@@ -16,7 +16,7 @@ skill:
   enable : true
   title : "Skills"
   item:
-    - title : "Web Design"
+    - title : "R Language"
       progress : "90%"
       color : "#fdb157"
       
