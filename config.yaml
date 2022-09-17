@@ -4,8 +4,8 @@ summaryLength: '10'
 theme: kross-hugo
 title: Kross
 params:
-  address: 125/A, CA Commercial Area, California, USA
-  author: Johnathan Smith
+  address: Regent's Park, London
+  author: Jason Huang
   baidu_analytics_id: ''
   baidu_site_verification: ''
   contact:
@@ -14,19 +14,19 @@ params:
   cookies:
     enable: yes
     expire_days: 2
-  copyright: Copyright &copy; 2021 a Theme by [Gethugothemes](https://gethugothemes.com)
+  copyright: Copyright &copy; 2021 Jason Huang
   description: This is meta description
-  email: steve.fruits@email.com
+  email: jas0nhg176@gmail.com
   google_analytics_id: ''
   home: Home
   logo: ''
   map:
     enable: yes
     gmap_api: https://maps.googleapis.com/maps/api/js?key=&#038;types=(cities)&#038;libraries=places&#038;language=en
-    map_latitude: '51.5223477'
-    map_longitude: '-0.1622023'
+    map_latitude: '51.525970'
+    map_longitude: '-0.162950'
     map_marker: images/marker.png
-  phone: +880 2544 658 256
+  phone: +44 07563 161073
   plugins:
     css:
       - link: plugins/bootstrap/bootstrap.min.css
