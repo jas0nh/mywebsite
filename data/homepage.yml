@@ -17,65 +17,65 @@ skill:
   title : "Skills"
   item:
     - title : "R Language"
-      progress : "90%"
+      progress : "80%"
       color : "#fdb157"
       
-    - title : "Logo Design"
-      progress : "60%"
+    - title : "Python"
+      progress : "70%"
       color : "#9473e6"
       
-    - title : "After Effects"
-      progress : "80%"
+    - title : "Data Analytics"
+      progress : "60%"
       color : "#bdecf6"
       
-    - title : "Web App"
-      progress : "70%"
+    - title : "Business Sense"
+      progress : "65%"
       color : "#ffbcaa"
 
 # experience
 experience:
   enable : true
-  title : "Experience"
+  title : "Internship Experience"
   item: 
-    - logo : "images/experience/icon-1.png"
-      title : "Junior UX Designer"
-      company : "WEBEX"
-      duration : "Jan 2007 - Feb 2009"
+    - logo : "images/experience/icon-1.jpg"
+      title : "Equity Research"
+      company : "TF Securities"
+      duration : "Jun 2022 - Aug 2022"
       
-    - logo : "images/experience/icon-2.png"
-      title : "UX & UI Designer"
-      company : "AUGMEDIX"
-      duration : "Mar 2009 - Aug 2014"
+    - logo : "images/experience/icon-2.jpg"
+      title : "Product Manager"
+      company : "Xiaomi"
+      duration : "Mar 2022 - Jun 2022"
       
-    - logo : "images/experience/icon-1.png"
-      title : "Senior UI Designer"
-      company : "THEMEFISHER"
-      duration : "Sep 2014 - Present"
+    - logo : "images/experience/icon-3.jpg"
+      title : "Data Analyst"
+      company : "Meituan"
+      duration : "Jun 2021 - Sep 2021"
 
 # education
 education:
   enable : true
   title : "Education"
   item:
-    - title : "Marters in UX Design"
-      year : "2006"
-      academy : "Masassusets Institute of Technology"
+    - title : "Masters in Analytics and Management"
+      year : "2022-2023"
+      academy : "London Business School"
       
-    - title : "Honours in Fine Arts"
-      year : "2004"
-      academy : "Harvard University"
+    - title : "FinTech (Minior)"
+      year : "2019-2022"
+      academy : "Renmin University"
       
-    - title : "Higher Secondary Certificat"
-      year : "2000"
-      academy : "Cardiff School"
+    - title : "Financial Management"
+      year : "2018-2022"
+      academy : "Renmin University"
       
-    - title : "Secondary School Certificate"
-      year : "1998"
-      academy : "Cardiff School"
+    - title : "Experimental Class"
+      year : "2015-2018"
+      academy : "Hangzhou High School"
 
 # service
 service:
-  enable : true
+  enable : false
   title : "Services"
   item:
     - title : "UI Design"
@@ -95,14 +95,14 @@ service:
 
 # portfolio
 portfolio:
-  enable : true
+  enable : false
   title : "Portfolio"
   item_show : 5
   # portfolio item comes from 'data/portfolio.yml' item.
 
 # testimonial
 testimonial:
-  enable : true
+  enable : false
   title : "Testimonials"
   item:
     - name : "Jesica Gomez"
@@ -122,7 +122,7 @@ testimonial:
 
 # client logo slider
 clients_logo_slider:
-  enable : true
+  enable : false
   item:
     - logo : "images/clients-logo/client-logo-1.png"
       URL : "http://examplesite.com"
