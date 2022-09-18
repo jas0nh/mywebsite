@@ -2,7 +2,7 @@ baseURL: https://jas0nhuang.netlify.app
 languageCode: en-us
 summaryLength: '10'
 theme: kross-hugo
-title: Kross
+title: Jason's Website
 params:
   address: Regent's Park, London
   author: Jason Huang
@@ -12,7 +12,7 @@ params:
     enable: yes
     form_action: '#'
   cookies:
-    enable: yes
+    enable: no
     expire_days: 2
   copyright: Copyright &copy; 2021 Jason Huang
   description: This is meta description
@@ -21,7 +21,7 @@ params:
   home: Home
   logo: ''
   map:
-    enable: yes
+    enable: no
     gmap_api: https://maps.googleapis.com/maps/api/js?key=&#038;types=(cities)&#038;libraries=places&#038;language=en
     map_latitude: '51.525970'
     map_longitude: '-0.162950'
@@ -59,9 +59,6 @@ menu:
     - URL: blog/
       name: Blog
       weight: 2
-    - URL: portfolio/
-      name: Portfolio
-      weight: 3
     - URL: contact/
       name: Contact
-      weight: 4
+      weight: 3
