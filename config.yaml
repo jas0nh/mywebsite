@@ -59,6 +59,9 @@ menu:
     - URL: blog/
       name: Projects
       weight: 2
+    - URL: "ZhichengHuang_resume summer ver HK.pdf"
+      name: CV
+      weight: 3
     - URL: contact/
       name: Social
-      weight: 3
+      weight: 4

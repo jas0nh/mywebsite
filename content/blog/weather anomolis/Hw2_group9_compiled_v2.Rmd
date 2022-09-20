@@ -1,0 +1,377 @@
+---
+title: "Weather Anomalies & Renewable Energy Production"
+author: "Jason Huang with Group 9"
+date: "2022-09-05"
+image: images/blog/post-4.jpg
+output:
+  html_document:
+    theme: flatly
+    highlight: zenburn
+    number_sections: yes
+    toc: yes
+    toc_float: yes
+    code_folding: show
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r, setup, include=FALSE}
+knitr::opts_chunk$set(
+  message = FALSE, 
+  warning = FALSE, 
+  tidy=FALSE,     # display code as typed
+  size="small")   # slightly smaller font for code
+options(digits = 3)
+
+# default figure size
+knitr::opts_chunk$set(
+  fig.width=6.75, 
+  fig.height=6.75,
+  fig.align = "center"
+)
+```
+
+```{r load-libraries, include=FALSE}
+library(tidyverse)  # Load ggplot2, dplyr, and all the other tidyverse packages
+library(mosaic)
+library(ggthemes)
+library(lubridate)
+library(here)
+library(skimr)
+library(janitor)
+library(httr)
+library(readxl)
+library(vroom)
+library(wbstats)
+library(countrycode)
+library(patchwork)
+library(gganimate)
+library(scales)
+library(infer)
+library(wbstats)
+```
+
+# Climate change and temperature anomalies
+
+*Combined Land-Surface Air and Sea-Surface Water Temperature Anomalies* in the
+Northern Hemisphere at [NASA's Goddard Institute for Space
+Studies](https://data.giss.nasa.gov/gistemp). [tabular data of
+temperature anomalies](https://data.giss.nasa.gov/gistemp/tabledata_v4/NH.Ts+dSST.txt)
+
+To define temperature anomalies you need to have a reference, or base,
+period which NASA clearly states that it is the period between
+1951-1980.
+
+```{r weather_data, cache=TRUE}
+
+weather <- 
+  read_csv("https://data.giss.nasa.gov/gistemp/tabledata_v4/NH.Ts+dSST.csv", 
+           skip = 1, 
+           na = "***",
+           show_col_types = FALSE)
+
+```
+
+
+```{r tidyweather}
+tidyweather <- weather %>%
+  select(1:13) %>%
+  pivot_longer(
+    cols=2:13,
+    names_to = 'Month',
+    values_to = 'delta'
+  )
+
+```
+
+## Plotting Information
+
+```{r scatter_plot}
+
+tidyweather <- tidyweather %>%
+  mutate(date = ymd(paste(as.character(Year), Month, "1")),
+         month = month(date, label=TRUE),
+         year = year(date))
+
+ggplot(tidyweather, aes(x=date, y = delta))+
+  geom_point()+
+  geom_smooth(color="red") +
+  theme_bw() +
+  labs (
+    title = "Weather Anomalies from 1880 to 2022"
+  )
+
+```
+
+
+```{r facet_wrap, echo=FALSE}
+
+tidyweather$Month <- 
+  factor(tidyweather$Month, levels = unlist(substr(month.name, 1,3)))
+
+ggplot(tidyweather, aes(x=date, y = delta))+
+  geom_point()+
+  geom_smooth(color="red") +
+  theme_bw() +
+  facet_wrap(.~Month)+
+  labs (
+    title = "Weather Anomalies in Different Months"
+  )
+```
+
+Now, we can inspect Weather Anomalies by months.
+
+```{r intervals}
+
+comparison <- tidyweather %>% 
+  filter(Year>= 1881) %>%     #remove years prior to 1881
+  #create new variable 'interval', and assign values based on criteria below:
+  mutate(interval = case_when(
+    Year %in% c(1881:1920) ~ "1881-1920",
+    Year %in% c(1921:1950) ~ "1921-1950",
+    Year %in% c(1951:1980) ~ "1951-1980",
+    Year %in% c(1981:2010) ~ "1981-2010",
+    TRUE ~ "2011-present"
+  ))
+
+comparison
+```
+
+We have add the intervals to the previous data. 
+
+```{r density_plot}
+
+ggplot(comparison, aes(x=delta, fill=interval))+
+  geom_density(alpha=.3)
+
+```
+
+
+```{r averaging}
+
+#creating yearly averages
+average_annual_anomaly <- tidyweather %>% 
+  group_by(Year) %>%   #grouping data by Year
+  
+  # creating summaries for mean delta 
+  # use `na.rm=TRUE` to eliminate NA (not available) values 
+  summarise(delta = mean(delta, na.rm=TRUE)) 
+
+#plotting the data:
+
+ggplot(average_annual_anomaly,aes(x=Year,y=delta))+
+  geom_point()+
+  geom_smooth(method = "loess")+
+  theme_bw()+
+  labs(title = "Average Annual Weather Anomalies")
+
+```
+
+## Confidence Interval for `delta`
+
+[NASA points out on their
+website](https://earthobservatory.nasa.gov/world-of-change/decadaltemp.php)
+that
+
+> A one-degree global change is significant because it takes a vast
+> amount of heat to warm all the oceans, atmosphere, and land by that
+> much. In the past, a one- to two-degree drop was all it took to plunge
+> the Earth into the Little Ice Age.
+
+```{r, calculate_CI_using_formula}
+
+formula_ci <- comparison %>% 
+  filter(interval == "2011-present") %>%
+  summarize(Mean = mean(delta, na.rm = TRUE), 
+            StdDev = sd(delta, na.rm =TRUE),
+            Count = n(),
+            StdError = StdDev/sqrt(Count),
+            t_criticial = qt(0.975, Count-1),
+            MarginOfError = t_criticial*StdError,
+            LowerPerc = Mean-MarginOfError,
+            UpperPerc = Mean+MarginOfError,
+            )
+
+set.seed(1234)
+
+bootstrap_ci <- comparison %>%
+  filter(interval == "2011-present") %>%
+  specify(response = delta) %>%
+  generate(reps = 10000, type = "bootstrap") %>%
+  calculate(stat = "mean")
+
+confidence_int_bootstrap <- bootstrap_ci %>%
+  get_confidence_interval(level = 0.95, type = "percentile")
+
+#print out formula_CI
+formula_ci
+
+confidence_int_bootstrap
+
+```
+
+> What is the data showing us? Please type your answer after (and
+> outside!) this blockquote. You have to explain what you have done, and
+> the interpretation of the result.
+
+We first drew a graph of weather anomalies of the Northern Hemisphere from 1880 to 2022 and discovered that with small fluctuations, weather anomalies have risen in the past two centuries. Next, we drew the same graph faceted by months and discovered that most months follow the same rising pattern, with exceptions of April, May, and July. Adding intervals, to the previous data and calculating Confidence Interval with formula, we are 95% confident to conclude that the mean of the population falls between 1.02 and 1.11
+
+
+# Challenge 2: Share of renewable energy production in the world
+
+The National Bureau of Economic Research (NBER) has a a very interesting
+dataset on the adoption of about 200 technologies in more than 150
+countries since 1800. This is the[Cross-country Historical Adoption of
+Technology (CHAT) dataset](https://www.nber.org/research/data/cross-country-historical-adoption-technology).
+
+
+```{r,load_technology_data}
+
+technology <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-07-19/technology.csv')
+
+#get all technologies
+labels <- technology %>% 
+  distinct(variable, label)
+
+# Get country names using 'countrycode' package
+technology <- technology %>% 
+  filter(iso3c != "XCD") %>% 
+  mutate(iso3c = recode(iso3c, "ROM" = "ROU"),
+         country = countrycode(iso3c, origin = "iso3c", destination = "country.name"),
+         country = case_when(
+           iso3c == "ANT" ~ "Netherlands Antilles",
+           iso3c == "CSK" ~ "Czechoslovakia",
+           iso3c == "XKX" ~ "Kosovo",
+           TRUE           ~ country))
+
+#make smaller dataframe on energy
+energy <- technology %>% 
+  filter(category == "Energy") %>% 
+  filter(variable !="electric_gen_capacity")
+
+wbdata_save <- read_csv("https://raw.githubusercontent.com/jas0nh/hello-world/master/wbdata_save.csv",show_col_types = FALSE)
+
+co2_percap <- wbdata_save %>% 
+  filter(!is.na(value)) %>% 
+  #drop unwanted variables
+  select(-c(unit, obs_status, footnote, last_updated))
+
+
+# get a list of countries and their characteristics
+# we just want to get the region a country is in and its income level
+
+countries <-  wb_countries() %>% 
+  select(country, iso3c, income_level) %>% 
+  filter(income_level!="Aggregates")
+
+```
+
+This is a very rich data set, not just for energy and CO2 data, but for
+many other technologies. In our case, we just need to produce a couple
+of graphs-- at this stage, the emphasis is on data manipulation, rather
+than making the graphs gorgeous.
+
+First, produce a graph with the countries with the highest and lowest %
+contribution of renewables in energy production. This is made up of
+`elec_hydro`, `elec_solar`, `elec_wind`, and `elec_renew_other`. You may
+want to use the *patchwork* package to assemble the two charts next to
+each other.
+
+```{r min-max_renewables, echo=FALSE, out.width="100%"}
+
+energy_2019 <- energy %>% 
+  filter(year=="2019") %>% 
+  drop_na()
+
+energy_left <- energy_2019 %>%
+  mutate(energy_type = ifelse(variable %in% c("elec_hydro","elec_solar","elec_wind","elec_renew_other"),"renewables","not_renewables")) %>% 
+  select(c('variable','country','value','energy_type')) %>% 
+  filter(energy_type=="renewables") %>% 
+  group_by(country) %>% 
+  summarise(energy_renewables = sum(value))
+
+energy_right <- energy_2019 %>%
+  select(c('variable','country','value')) %>%   
+  filter(variable =="elecprod")
+
+energy_result <- merge(x=energy_left, y=energy_right, by="country", all.y=TRUE) %>% 
+  mutate_at(vars(energy_renewables), ~replace_na(.,0)) %>% 
+  mutate(renewables_pct = energy_renewables/value) %>% 
+  # drop number that seems wrong. but not sure
+  ########## Need Further Discussion ###########
+  filter(renewables_pct!=0)
+  
+energy_result_plot1 <- energy_result %>% 
+  slice_max(energy_result$renewables_pct,n = 20) %>% 
+  mutate(country = fct_reorder(country, renewables_pct, .desc = FALSE))
+  
+energy_result_plot2 <- energy_result %>% 
+  slice_min(energy_result$renewables_pct,n = 20) %>% 
+  mutate(country = fct_reorder(country, renewables_pct, .desc = FALSE))
+
+p1 <- ggplot(energy_result_plot1, aes(x = renewables_pct,y= country)) + 
+  geom_col(width = NULL)+
+  labs(x='',y='',)+
+  scale_x_continuous(labels = percent)
+
+p2 <- ggplot(energy_result_plot2, aes(x = renewables_pct,y= country)) + 
+  geom_col(width = NULL)+
+  labs(x='',y='')+
+  scale_x_continuous(labels = percent)
+
+p1+ p2 + plot_annotation(
+  title = 'Highest and lowest % of renewables in energy production',
+  subtitle = '2019 Data',
+  caption = 'Source: NBER CHAT Database'
+)
+
+
+```
+
+> As the % of energy generated by renewables goes up, do CO2 per capita emissions seem to go down?
+
+From the animation, we can tell that from 1991 to 2020, CO2 per capita emissions semm to go dowanwards with the rate of energy generated by renewables rises.
+
+
+```{r animation, echo=FALSE, out.width="100%", dev='png', interval=0.2}
+library(gganimate)
+
+energy_left <- energy %>%
+  mutate(energy_type = ifelse(variable %in% c("elec_hydro","elec_solar","elec_wind","elec_renew_other"),"renewables","not_renewables")) %>% 
+  select(c('year','variable','iso3c','value','energy_type')) %>%
+  filter(energy_type=="renewables") %>% 
+  group_by(iso3c,year) %>%
+  summarise(energy_renewables = sum(value))
+
+energy_right <- energy %>%
+  select(c('year','variable','iso3c','value')) %>% 
+  filter(variable =="elecprod")
+
+energy_pct <- merge(x=energy_left, y=energy_right, by=c("iso3c","year"),all.y = TRUE) %>% 
+  mutate_at(vars(energy_renewables), ~replace_na(.,0)) %>% 
+  mutate(renewables_pct = energy_renewables/value) %>% 
+  select(c('year','iso3c','renewables_pct'))
+
+names(co2_percap)[names(co2_percap) == "date"] <- "year"
+names(co2_percap)[names(co2_percap) == "value"] <- "co2"
+
+energy_co2 <- merge(x=energy_pct, y=co2_percap, by=c("iso3c","year"),all.x = TRUE) %>%
+  select(-c('country'))
+
+energy_co2_cty <- merge(x=energy_co2, y=countries, by="iso3c", all.x = TRUE) %>% 
+  filter(year>=1991) %>% 
+  filter(income_level %in% c("High income","Low income","Lower middle income","Upper middle income") ) %>% 
+  select(c('year','country','renewables_pct','income_level','co2'))
+
+
+ggplot(energy_co2_cty,aes(x=renewables_pct,y=co2,colour=income_level))+
+  geom_point()+
+  facet_wrap(~income_level)+
+  labs(title = 'Year:{as.integer(frame_time)}', 
+     x = '% renewables', 
+     y = 'CO2 per cap') +
+  transition_time(year) +
+  theme(legend.position = "none")
+  ease_aes('linear')
+```

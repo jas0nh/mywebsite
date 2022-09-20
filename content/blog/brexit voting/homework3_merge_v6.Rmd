@@ -1,5 +1,5 @@
 ---
-title: "Session 6: Homework 3"
+title: "How Political Affiliation Translated to Brexit Voting"
 author: "Jason Huang"
 date: "2022-09-12"
 image: images/blog/post-1.jpg
@@ -46,11 +46,15 @@ library(openintro)
 library(psych)
 ```
 
-# Challenge 1: Brexit plot
+I used the Brexit results dataframe to generate a scatterplot to show *How Political Affiliation Translated to Brexit Voting*.
 
-From Wikipedia page [Index of United Kingdom political parties meta attributes](https://en.wikipedia.org/wiki/Wikipedia:Index_of_United_Kingdom_political_parties_meta_attributes), we get the hex codes of given Parties.
 
-```{r brexit_challenge_answer, warning=FALSE, message=FALSE, echo=FALSE, out.width="100%"}
+From Wikipedia page [Index of United Kingdom political parties meta attributes](https://en.wikipedia.org/wiki/Wikipedia:Index_of_United_Kingdom_political_parties_meta_attributes), I got the hex codes of given Parties.
+
+
+**Here comes the code:**
+
+```{r brexit_challenge_answer, warning=FALSE, message=FALSE, out.width="100%"}
 
 brexit_results <- read_csv("https://raw.githubusercontent.com/kostis-christodoulou/am01/master/data/brexit_results.csv")
 

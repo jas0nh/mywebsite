@@ -1,0 +1,223 @@
+---
+title: "Weather Anomalies & Renewable Energy Production"
+author: "Jason Huang with Group 9"
+date: "2022-09-05"
+image: images/blog/post-4.jpg
+output:
+  html_document:
+    theme: flatly
+    highlight: zenburn
+    number_sections: yes
+    toc: yes
+    toc_float: yes
+    code_folding: show
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+
+
+<div id="climate-change-and-temperature-anomalies" class="section level1">
+<h1>Climate change and temperature anomalies</h1>
+<p><em>Combined Land-Surface Air and Sea-Surface Water Temperature Anomalies</em> in the
+Northern Hemisphere at <a href="https://data.giss.nasa.gov/gistemp">NASA’s Goddard Institute for Space
+Studies</a>. <a href="https://data.giss.nasa.gov/gistemp/tabledata_v4/NH.Ts+dSST.txt">tabular data of
+temperature anomalies</a></p>
+<p>To define temperature anomalies you need to have a reference, or base,
+period which NASA clearly states that it is the period between
+1951-1980.</p>
+<pre class="r"><code>weather &lt;- 
+  read_csv(&quot;https://data.giss.nasa.gov/gistemp/tabledata_v4/NH.Ts+dSST.csv&quot;, 
+           skip = 1, 
+           na = &quot;***&quot;,
+           show_col_types = FALSE)</code></pre>
+<pre class="r"><code>tidyweather &lt;- weather %&gt;%
+  select(1:13) %&gt;%
+  pivot_longer(
+    cols=2:13,
+    names_to = &#39;Month&#39;,
+    values_to = &#39;delta&#39;
+  )</code></pre>
+<div id="plotting-information" class="section level2">
+<h2>Plotting Information</h2>
+<pre class="r"><code>tidyweather &lt;- tidyweather %&gt;%
+  mutate(date = ymd(paste(as.character(Year), Month, &quot;1&quot;)),
+         month = month(date, label=TRUE),
+         year = year(date))
+
+ggplot(tidyweather, aes(x=date, y = delta))+
+  geom_point()+
+  geom_smooth(color=&quot;red&quot;) +
+  theme_bw() +
+  labs (
+    title = &quot;Weather Anomalies from 1880 to 2022&quot;
+  )</code></pre>
+<p><img src="/blog/weather anomolis/Hw2_group9_compiled_v2_files/figure-html/scatter_plot-1.png" width="648" style="display: block; margin: auto;" /></p>
+<p><img src="/blog/weather anomolis/Hw2_group9_compiled_v2_files/figure-html/facet_wrap-1.png" width="648" style="display: block; margin: auto;" /></p>
+<p>Now, we can inspect Weather Anomalies by months.</p>
+<pre class="r"><code>comparison &lt;- tidyweather %&gt;% 
+  filter(Year&gt;= 1881) %&gt;%     #remove years prior to 1881
+  #create new variable &#39;interval&#39;, and assign values based on criteria below:
+  mutate(interval = case_when(
+    Year %in% c(1881:1920) ~ &quot;1881-1920&quot;,
+    Year %in% c(1921:1950) ~ &quot;1921-1950&quot;,
+    Year %in% c(1951:1980) ~ &quot;1951-1980&quot;,
+    Year %in% c(1981:2010) ~ &quot;1981-2010&quot;,
+    TRUE ~ &quot;2011-present&quot;
+  ))
+
+comparison</code></pre>
+<pre><code>## # A tibble: 1,704 × 7
+##     Year Month delta date       month  year interval 
+##    &lt;dbl&gt; &lt;fct&gt; &lt;dbl&gt; &lt;date&gt;     &lt;ord&gt; &lt;dbl&gt; &lt;chr&gt;    
+##  1  1881 Jan   -0.3  1881-01-01 Jan    1881 1881-1920
+##  2  1881 Feb   -0.24 1881-02-01 Feb    1881 1881-1920
+##  3  1881 Mar   -0.05 1881-03-01 Mar    1881 1881-1920
+##  4  1881 Apr   -0.02 1881-04-01 Apr    1881 1881-1920
+##  5  1881 May    0.05 1881-05-01 May    1881 1881-1920
+##  6  1881 Jun   -0.33 1881-06-01 Jun    1881 1881-1920
+##  7  1881 Jul    0.1  1881-07-01 Jul    1881 1881-1920
+##  8  1881 Aug   -0.04 1881-08-01 Aug    1881 1881-1920
+##  9  1881 Sep   -0.28 1881-09-01 Sep    1881 1881-1920
+## 10  1881 Oct   -0.44 1881-10-01 Oct    1881 1881-1920
+## # … with 1,694 more rows
+## # ℹ Use `print(n = ...)` to see more rows</code></pre>
+<p>We have add the intervals to the previous data.</p>
+<pre class="r"><code>ggplot(comparison, aes(x=delta, fill=interval))+
+  geom_density(alpha=.3)</code></pre>
+<p><img src="/blog/weather anomolis/Hw2_group9_compiled_v2_files/figure-html/density_plot-1.png" width="648" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>#creating yearly averages
+average_annual_anomaly &lt;- tidyweather %&gt;% 
+  group_by(Year) %&gt;%   #grouping data by Year
+  
+  # creating summaries for mean delta 
+  # use `na.rm=TRUE` to eliminate NA (not available) values 
+  summarise(delta = mean(delta, na.rm=TRUE)) 
+
+#plotting the data:
+
+ggplot(average_annual_anomaly,aes(x=Year,y=delta))+
+  geom_point()+
+  geom_smooth(method = &quot;loess&quot;)+
+  theme_bw()+
+  labs(title = &quot;Average Annual Weather Anomalies&quot;)</code></pre>
+<p><img src="/blog/weather anomolis/Hw2_group9_compiled_v2_files/figure-html/averaging-1.png" width="648" style="display: block; margin: auto;" /></p>
+</div>
+<div id="confidence-interval-for-delta" class="section level2">
+<h2>Confidence Interval for <code>delta</code></h2>
+<p><a href="https://earthobservatory.nasa.gov/world-of-change/decadaltemp.php">NASA points out on their
+website</a>
+that</p>
+<blockquote>
+<p>A one-degree global change is significant because it takes a vast
+amount of heat to warm all the oceans, atmosphere, and land by that
+much. In the past, a one- to two-degree drop was all it took to plunge
+the Earth into the Little Ice Age.</p>
+</blockquote>
+<pre class="r"><code>formula_ci &lt;- comparison %&gt;% 
+  filter(interval == &quot;2011-present&quot;) %&gt;%
+  summarize(Mean = mean(delta, na.rm = TRUE), 
+            StdDev = sd(delta, na.rm =TRUE),
+            Count = n(),
+            StdError = StdDev/sqrt(Count),
+            t_criticial = qt(0.975, Count-1),
+            MarginOfError = t_criticial*StdError,
+            LowerPerc = Mean-MarginOfError,
+            UpperPerc = Mean+MarginOfError,
+            )
+
+set.seed(1234)
+
+bootstrap_ci &lt;- comparison %&gt;%
+  filter(interval == &quot;2011-present&quot;) %&gt;%
+  specify(response = delta) %&gt;%
+  generate(reps = 10000, type = &quot;bootstrap&quot;) %&gt;%
+  calculate(stat = &quot;mean&quot;)
+
+confidence_int_bootstrap &lt;- bootstrap_ci %&gt;%
+  get_confidence_interval(level = 0.95, type = &quot;percentile&quot;)
+
+#print out formula_CI
+formula_ci</code></pre>
+<pre><code>## # A tibble: 1 × 8
+##    Mean StdDev Count StdError t_criticial MarginOfError LowerPerc UpperPerc
+##   &lt;dbl&gt;  &lt;dbl&gt; &lt;int&gt;    &lt;dbl&gt;       &lt;dbl&gt;         &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+## 1  1.07  0.265   144   0.0221        1.98        0.0437      1.02      1.11</code></pre>
+<pre class="r"><code>confidence_int_bootstrap</code></pre>
+<pre><code>## # A tibble: 1 × 2
+##   lower_ci upper_ci
+##      &lt;dbl&gt;    &lt;dbl&gt;
+## 1     1.02     1.11</code></pre>
+<blockquote>
+<p>What is the data showing us? Please type your answer after (and
+outside!) this blockquote. You have to explain what you have done, and
+the interpretation of the result.</p>
+</blockquote>
+<p>We first drew a graph of weather anomalies of the Northern Hemisphere from 1880 to 2022 and discovered that with small fluctuations, weather anomalies have risen in the past two centuries. Next, we drew the same graph faceted by months and discovered that most months follow the same rising pattern, with exceptions of April, May, and July. Adding intervals, to the previous data and calculating Confidence Interval with formula, we are 95% confident to conclude that the mean of the population falls between 1.02 and 1.11</p>
+</div>
+</div>
+<div id="challenge-2-share-of-renewable-energy-production-in-the-world" class="section level1">
+<h1>Challenge 2: Share of renewable energy production in the world</h1>
+<p>The National Bureau of Economic Research (NBER) has a a very interesting
+dataset on the adoption of about 200 technologies in more than 150
+countries since 1800. This is the<a href="https://www.nber.org/research/data/cross-country-historical-adoption-technology">Cross-country Historical Adoption of
+Technology (CHAT) dataset</a>.</p>
+<pre class="r"><code>technology &lt;- readr::read_csv(&#39;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-07-19/technology.csv&#39;)
+
+#get all technologies
+labels &lt;- technology %&gt;% 
+  distinct(variable, label)
+
+# Get country names using &#39;countrycode&#39; package
+technology &lt;- technology %&gt;% 
+  filter(iso3c != &quot;XCD&quot;) %&gt;% 
+  mutate(iso3c = recode(iso3c, &quot;ROM&quot; = &quot;ROU&quot;),
+         country = countrycode(iso3c, origin = &quot;iso3c&quot;, destination = &quot;country.name&quot;),
+         country = case_when(
+           iso3c == &quot;ANT&quot; ~ &quot;Netherlands Antilles&quot;,
+           iso3c == &quot;CSK&quot; ~ &quot;Czechoslovakia&quot;,
+           iso3c == &quot;XKX&quot; ~ &quot;Kosovo&quot;,
+           TRUE           ~ country))
+
+#make smaller dataframe on energy
+energy &lt;- technology %&gt;% 
+  filter(category == &quot;Energy&quot;) %&gt;% 
+  filter(variable !=&quot;electric_gen_capacity&quot;)
+
+wbdata_save &lt;- read_csv(&quot;https://raw.githubusercontent.com/jas0nh/hello-world/master/wbdata_save.csv&quot;,show_col_types = FALSE)
+
+co2_percap &lt;- wbdata_save %&gt;% 
+  filter(!is.na(value)) %&gt;% 
+  #drop unwanted variables
+  select(-c(unit, obs_status, footnote, last_updated))
+
+
+# get a list of countries and their characteristics
+# we just want to get the region a country is in and its income level
+
+countries &lt;-  wb_countries() %&gt;% 
+  select(country, iso3c, income_level) %&gt;% 
+  filter(income_level!=&quot;Aggregates&quot;)</code></pre>
+<p>This is a very rich data set, not just for energy and CO2 data, but for
+many other technologies. In our case, we just need to produce a couple
+of graphs– at this stage, the emphasis is on data manipulation, rather
+than making the graphs gorgeous.</p>
+<p>First, produce a graph with the countries with the highest and lowest %
+contribution of renewables in energy production. This is made up of
+<code>elec_hydro</code>, <code>elec_solar</code>, <code>elec_wind</code>, and <code>elec_renew_other</code>. You may
+want to use the <em>patchwork</em> package to assemble the two charts next to
+each other.</p>
+<p><img src="/blog/weather anomolis/Hw2_group9_compiled_v2_files/figure-html/min-max_renewables-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<blockquote>
+<p>As the % of energy generated by renewables goes up, do CO2 per capita emissions seem to go down?</p>
+</blockquote>
+<p>From the animation, we can tell that from 1991 to 2020, CO2 per capita emissions semm to go dowanwards with the rate of energy generated by renewables rises.</p>
+<p><img src="/blog/weather anomolis/Hw2_group9_compiled_v2_files/figure-html/animation-1.gif" width="100%" style="display: block; margin: auto;" /></p>
+<pre><code>## &lt;ggproto object: Class EaseAes, gg&gt;
+##     aes_names: 
+##     aesthetics: 
+##     default: linear
+##     get_ease: function
+##     super:  &lt;ggproto object: Class EaseAes, gg&gt;</code></pre>
+</div>

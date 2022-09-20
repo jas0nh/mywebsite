@@ -7,3 +7,6 @@ title: Intro to this Catagory
 ---
 
 Here, I put the recent projects done in Applied Statistic to showcase what I've learned recently during MAM programme @ LBS.
+
+
+By the way, all the banner photos here are taken by myself : )
