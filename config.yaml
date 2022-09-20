@@ -46,14 +46,18 @@ params:
       icon: ti-linkedin
     - URL: 'https://www.instagram.com/jas0nhuang01/'
       icon: ti-instagram
-  theme_color: '#41228e'
+    - URL: 'https://twitter.com/Jas0nHg'
+      icon: ti-twitter
+    - URL: 'https://www.youtube.com/channel/UCwHi-oPMOj2Sp6-6BcNiYjA'
+      icon: ti-youtube
+  theme_color: '#228e8a'
 menu:
   main:
     - URL: about/
       name: About
       weight: 1
     - URL: blog/
-      name: Blog
+      name: Projects
       weight: 2
     - URL: contact/
       name: Social

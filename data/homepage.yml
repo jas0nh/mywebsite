@@ -16,7 +16,7 @@ skill:
   enable : true
   title : "Skills"
   item:
-    - title : "R Language"
+    - title : "R"
       progress : "80%"
       color : "#fdb157"
       
@@ -157,5 +157,5 @@ clients_logo_slider:
 # blog
 blog:
   enable : true
-  title : "Blogs"
+  title : "Projects"
   # blog post comes from "content/blog" folder

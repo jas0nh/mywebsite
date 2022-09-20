@@ -1,0 +1,79 @@
+---
+title: "Session 6: Homework 3"
+author: "Jason Huang"
+date: "2022-09-12"
+image: images/blog/post-1.jpg
+tags: ["R Markdown", "plot", "regression"]
+output:
+  html_document:
+    theme: flatly
+    highlight: zenburn
+    number_sections: yes
+    toc: yes
+    toc_float: yes
+    code_folding: show
+---
+
+```{r, setup, echo=FALSE}
+knitr::opts_chunk$set(
+  message = FALSE, 
+  warning = FALSE, 
+  tidy=FALSE,     # display code as typed
+  size="small")   # slightly smaller font for code
+options(digits = 3)
+
+# default figure size
+knitr::opts_chunk$set(
+  fig.width=6.75, 
+  fig.height=6.75,
+  fig.align = "center"
+)
+```
+
+```{r load-libraries, echo=FALSE}
+library(tidyverse)  # Load ggplot2, dplyr, and all the other tidyverse packages
+library(mosaic)
+library(ggthemes)
+library(GGally)
+library(readxl)
+library(here)
+library(skimr)
+library(janitor)
+library(broom)
+library(tidyquant)
+library(infer)
+library(openintro)
+library(psych)
+```
+
+# Challenge 1: Brexit plot
+
+From Wikipedia page [Index of United Kingdom political parties meta attributes](https://en.wikipedia.org/wiki/Wikipedia:Index_of_United_Kingdom_political_parties_meta_attributes), we get the hex codes of given Parties.
+
+```{r brexit_challenge_answer, warning=FALSE, message=FALSE, echo=FALSE, out.width="100%"}
+
+brexit_results <- read_csv("https://raw.githubusercontent.com/kostis-christodoulou/am01/master/data/brexit_results.csv")
+
+brexit_long <- brexit_results[1:6] %>% 
+  pivot_longer(cols = 2:5, names_to = "party", values_to = "party_pct") %>% 
+  mutate(across('party', str_replace, 'con_2015', 'Conservative')) %>% 
+  mutate(across('party', str_replace, 'lab_2015', 'Labour')) %>% 
+  mutate(across('party', str_replace, 'ld_2015', 'Lib Dems')) %>% 
+  mutate(across('party', str_replace, 'ukip_2015', 'UKIP'))
+
+ggplot(brexit_long, aes(x=party_pct,y=leave_share, colour = party))+
+  geom_point(size = 1, alpha = 0.3)+
+  geom_smooth(method = 'lm')+
+  theme(text = element_text(size = 8),
+        aspect.ratio = 0.5, 
+        legend.position = "bottom", 
+        legend.title = element_blank(), 
+        legend.text = element_text(size=8))+
+  labs(title = 'How political affiliation translated to Brexit Voting',
+       y = 'Leave % in the 2016 Brexit referendum',
+       x = 'Party % in the UK 2015 general election'
+       ) +
+  scale_colour_manual(values = c("#0087DC", "#E4003B", "#FAA61A","#6D3177"))
+
+```
+
