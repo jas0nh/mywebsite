@@ -6,6 +6,6 @@ draft: false
 title: About Me
 ---
 
-Hi! I'm Jason Huang. I love coding with R!
+Hi! I'm Jason Huang from China. I was born in 2000. I graduated from Renmin University in June 2022 before coming to London. My previous internship experiences includes Product Managment, Business Analytics and In-house Consulting in Big Tech and Equity Research in Securities.
 
-This is my first time trying to build a personal website. But I am trying my best to do it right.
+I love coding with R! This is my first time trying to build a personal website. But I am trying my best to do it right.
